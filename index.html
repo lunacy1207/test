@@ -15,7 +15,12 @@
   <body>
     <div class="webgl-content">
       <div id="unityContainer" style="width: 800px; height: 600px"></div>
-
+      <script>
+    var mywidth = innerWidth;
+    var myheight = innerHeight;
+        document.getElementById("unityContainer").style.width = mywidth + "px";
+        document.getElementById("unityContainer").style.height = myheight + "px";
+    </script>
     </div>
   </body>
 </html>
