@@ -1,0 +1,889 @@
+<html>
+  <head>
+    <title>自由之路 AR導覽</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C96RW7MTWP"></script>
+    <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-C96RW7MTWP');
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image.prod.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        .window{
+          border-radius: 10px;
+            width: 88%;
+            height: 55%;
+            background: rgb(55, 55, 55);
+            z-index: 3;
+            position: absolute;
+            margin: auto auto;
+            top: -0%; left: 0; bottom: 0; right: 0;
+            justify-content: space-between;
+            visibility:hidden;
+            display: none;
+            transition: opacity 0.3s,visibility 0.3s;
+            flex-flow: column;
+            opacity: 0;
+            box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.2);
+
+        }
+        h3{
+          color:white;
+          font-size: 6vmin;
+          font-weight: 500;
+          text-align: center;
+          vertical-align: middle;
+          margin: 0;
+          line-height: 2.4em;
+          padding: 50px auto;
+          height: 2.4em;
+          background: rgb(30, 30, 30);
+          
+        }
+        h3.green{
+          color: rgb(30, 189, 110);
+        }
+        .window p{
+          font-size: 4vw;
+          font-weight: bold;
+          line-height: 4vh;
+          letter-spacing: 0.1em;
+          color:rgb(200, 200, 200);
+          overflow: auto;
+          flex:1;
+          margin: 0;
+          padding: 3vmax 10vmin;
+
+        }
+        a:link {
+  text-decoration: none;
+}
+        .window button{
+          letter-spacing: 0.1em;
+          color: rgb(30, 189, 110);
+          border-radius: 30px;
+          outline: white solid 1px;
+          background-color: rgba(255, 255, 255, 0.24);
+          display: flex;
+          flex: 2 1 100%;
+          max-height: 50px;
+          height:5vh;
+          margin:1vh 30px  0;
+          border: none;
+          
+          font-weight: bold;
+          font-size: 4vw;
+          align-items: center;
+          justify-content: center;
+        }
+        .window.show{
+          opacity: 1;
+            visibility:visible; 
+            display:flex;
+            top: -0%; left: 0; bottom: 0; right: 0;
+        }
+        .window.bottom{
+          top: 200%; left: 0; bottom: 0; right: 0;
+            visibility:hidden; 
+        }
+        .container{
+          display: flex;
+          flex-wrap: wrap;
+         
+          justify-content: center;
+          width:100%;
+          margin-bottom:10px;
+
+          
+        }
+        #progress .container{
+          position: relative;
+          
+        }
+        .stamp{
+          height: 18vmin;
+          flex: 0 1 16vmin;
+          margin: 5px 5px;
+          opacity: 0.3 ;
+        }
+        .stamp.show{
+          opacity: 1;
+        }
+        #progressBar .container{
+          height: 50%;
+          width: 100%;
+          position: relative;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          align-items: center;
+          margin: 0;
+        }
+        #progressBar{
+          background: none;
+          position: absolute;
+          padding: 0;
+          z-index: 5;
+          left: 0;right: 0;top:79%;
+          margin: auto auto;
+          width: 90vw;
+          height: 10vw;
+          border: none;
+          font-size: 15px;
+        }
+        #certificate_window{
+            width: 88%;
+            height: fit-content;
+            text-align: center;
+           display: none;
+            position: absolute;
+            margin: auto auto;
+            z-index: 6;
+            top: -0%; left: 0; bottom: 0; right: 0;
+            opacity: 0;
+            box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.2);
+          visibility: hidden;
+        }
+        #certificate_window.show{
+          visibility: visible;
+          display: block;
+          opacity: 1;
+        }
+        #certificate_window button{
+          width: 12%;
+          padding:0 0 12% 0;
+          height: 0;
+          box-sizing: border-box;
+          z-index: 7;
+          position: absolute;
+          border-radius: 20%;
+          background-color: rgba(0, 0, 0, 0);
+          background-size: contain;
+          background-repeat: no-repeat;
+          border: 0;
+        }
+        #canvasWrapper{
+          z-index: 6;
+          margin:auto auto;
+          display:inline-block;
+          height: fit-content;
+          max-height: 100%;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+            visibility: hidden;
+            opacity: 0;
+        }
+        #canvasWrapper.show{
+          visibility: visible;
+          opacity: 1;
+        }
+        #certificate{
+
+          z-index: 5;
+          
+          margin:auto auto;
+          display: inline-block;
+          height: fit-content;
+          max-height: 100%;
+          width: 100%;
+          background-position: center;
+        }
+        .html2canvas{
+          position: absolute;
+          margin:auto auto;
+          top: 0;bottom: 0;left: 0;right: 0;
+          height: fit-content;
+          width: 100%;
+        }
+        #certificate img{
+          width: 100%;
+          height: 100%;
+          max-height: 90vh;
+          object-fit: contain;
+        }
+        #cert_name{
+          position: absolute;
+          top:34%;
+          left: 0;right: 0;
+          margin: 0 auto;
+          font-size: 6vmin;
+         width:100%;
+         text-align: center;
+         letter-spacing: 0.05em;
+        }
+        #cert_date{
+          position: absolute;
+          top:88%;
+          left: 0;right: 0;
+          margin: 0 auto;
+          font-size: 5vmin;
+          width:100%;
+          text-align: center;
+          font-weight: normal;
+          letter-spacing: 0.05em;
+        }
+        .stampdot{
+          flex: 0 1 2vmin;
+          height:2vmin;
+          background-color: white;
+          border: solid 1.5vmin rgb(60, 60, 60);
+          border-radius: 50%;
+          visibility: hidden;
+        }
+        .stampdot.show{
+          visibility: visible;
+        }
+        #dot8{
+          border: solid 2vmin rgb(33,186,108);
+        }
+        #progress1{
+          background-image: url("Markers/area1.jpg");
+          background-size: cover;
+        }
+        #progress2{
+          background-image: url("Markers/area2.jpg");
+          background-size: cover;
+        }
+        #progress3{
+          background-image: url("Markers/area3.jpg");
+          background-size: cover;
+        }
+        #progress4{
+          background-image: url("Markers/area4.jpg");
+          background-size: cover;
+        }
+        #progress5{
+          background-image: url("Markers/area5.jpg");
+          background-size: cover;
+        }
+        #progress6{
+          background-image: url("Markers/area6.jpg");
+          background-size: cover;
+        }
+        #progress7{
+          background-image: url("Markers/area7.jpg");
+          background-size: cover;
+        }
+        #progress7{
+          background-image: url("Markers/portrait14.jpg");
+          background-size: cover;
+        }
+        .dottedLine{
+        border:none;
+        border-top:2px dashed rgb(60, 60, 60);
+        position: absolute;
+        bottom: 0%;
+        margin: 0;
+        height:50%;
+        width:100%;
+        }
+        @media only screen and (orientation: landscape) {
+          .window{
+            width: 85%;
+
+        }
+        .window.show{
+            width: 85%;
+            
+            
+        }
+        .window p{
+          font-size: 4vh;
+          line-height: 7vh;
+
+        }
+
+         .window button{
+          font-size: 4vh;
+          flex:1;
+          height:8vh;
+          margin: 0 5px 0 5px;
+        }
+        
+        button#progress{
+          max-height: 8vh;
+
+        }
+        #progress .container{
+          flex-wrap: nowrap;
+          
+        }
+        .container{
+          margin: auto auto 10px;
+          width: 90%;
+        }
+        #certificate_window{
+          height: 88vh;
+          width: fit-content;
+        }
+        #certificate{
+          height: 100%;
+          width: fit-content;
+        }
+        #canvasWrapper{
+          height: 100%;
+          width: 100%;
+        }
+        .html2canvas{
+          height: 100%;
+          width: fit-content;
+        }
+        }
+
+    </style>
+  </head>
+  <body>
+    <div class="scanui"></div>
+    <div id="quiz1" class="window">
+      <h3>箝制言論的體制形成</h3>
+      <p>在20世紀初，出版品是資訊流通的重要媒介，然而在1930年代，國民政府以《出版法》完備「報禁」的政策，是限制了哪些出版的自由？</p>
+        <div class="container">
+        <button onclick="chooseAnswer(1,1)">限制報紙張數</button>
+        <button onclick="chooseAnswer(1,2)">限制報刊登記</button>
+        <button onclick="chooseAnswer(1,3)">限制印刷地</button>
+        </div>
+    </div>
+    <div id="answer1_1" class="window">
+      <h3 class="green">限制報紙張數</h3>
+      <p>1947年2月國民政府以紙張不足為由，通令各報社限制印製張數；中華民國政府遷台後，行政院於1950年底下令報紙只能日出一張半（6版），並在1955年正式頒佈實施《戰時新聞用紙節約辦法》，作為限張的主要依據。</p>
+        <div class="container"><button onclick="openWindow('#quiz1');closeWindow('#answer1_1')">返回</button><button onclick="closeAnswer(1,1)">好</button></div>
+    </div>
+    <div id="answer1_2" class="window">
+      <h3 class="green">限制報刊登記</h3>
+      <p>1951年，台灣省政府與行政院，陸續以要求限制新報刊的申請，直到1988年報禁解除。「限證」政策才告結束。</p>
+        <div class="container"><button onclick="openWindow('#quiz1');closeWindow('#answer1_2')">返回</button><button onclick="closeAnswer(1,2)">好</button></div>
+    </div>
+    <div id="answer1_3" class="window">
+      <h3 class="green">限制印刷地</h3>
+
+      <p>1955年3月《自由中國》刊出立委成舍我，針對《出版法施行細則》執行報禁政策的質詢稿。成舍我在質詢中批判嚴重侵害言論自由，讓報禁政策的問題正式浮上檯面。不僅「限張」、「限證」《出版法施行細則》第六、七條，還進一步限制報刊發行地與印刷地（限印）。</p>
+        <div class="container"><button onclick="openWindow('#quiz1');closeWindow('#answer1_3')">返回</button><button onclick="closeAnswer(1,3)">好</button></div>
+    </div>
+
+    <div id="quiz2" class="window">
+      <h3>1945-1949年台灣媒體浩劫與四六事件</h3>
+      <p>今日臺灣學風自由民主，成為一位臺大、師大的大學生，在戒嚴初期，可能會因為什麼事被警察抓？</p>
+
+        <div class="container">
+        <button onclick="chooseAnswer(2,1)">與同學共乘單車</button>
+        <button onclick="chooseAnswer(2,2)">抗議警察執法過當</button>
+        <button onclick="chooseAnswer(2,3)">在連儂牆（Lennon Wall）為正義發聲</button></div>
+    </div>
+    <div id="answer2_1" class="window">
+      <h3 class="green">與同學共乘單車</h3>
+      <p>與同學共乘單車	1949年3月20日台大與師院學生因共乘單車被警察取締，雙方發生衝突，學生被抓進警局。</p>
+        <div class="container"><button onclick="closeAnswer(2,1)">好</button></div>
+    </div>
+    <div id="answer2_2" class="window">
+      <h3 class="green">抗議警察執法過當</h3>
+      <p>抗議警察執法過當	國民黨當局為了壓制集結抗議的學生運動，1949年4月6日，兼任臺灣省警備總司令部總司令的省主席陳誠，對學生展開大逮捕行動並下令學校停課，即為「四六事件」。</p>
+        <div class="container"><button onclick="closeAnswer(2,2)">好</button></div>
+    </div>
+    <div id="answer2_3" class="window">
+      <h3 class="green">在連儂牆（Lennon Wall）為正義發聲</h3>
+
+      <p>在連儂牆（Lennon Wall）為正義發聲	「四六事件」警備總部以「張貼標語、散發傳單、搧惑人心、擾亂秩序」為由逮捕學生，且臺灣省政府要求師範學院所有學生重新登記學籍，此舉導致一些學生無法復學。</p>
+        <div class="container"><button onclick="closeAnswer(2,3)">好</button></div>
+    </div>
+
+  <div id="quiz3" class="window">
+    <h3>1950年代《自由中國》與不分省籍的奮戰</h3>
+    <p>今日臺灣人民有組織政黨、集會、結社的自由，但在1950年代，若你想組織一個反對黨，可能會遭遇甚麼事？</p>
+      <div class="container">
+      <button onclick="chooseAnswer(3,1)">需要貸款卻被銀行拒絕</button>
+      <button onclick="chooseAnswer(3,2)">法院傳票像廣告信件一樣收不完</button>
+      <button onclick="chooseAnswer(3,3)">特務整天跟監你，甚至抓去關</button></div>
+  </div>
+  <div id="answer3_1" class="window">
+    <h3 class="green">需要貸款卻被銀行拒絕</h3>
+    <p>雷震等人預定於1960年9月成立「中國民主黨」，並投入隔年的地方選舉。籌組時期，國民黨當局更加嚴密監控組黨人士，例如吳三連的事業即遭威脅，銀行拒絕提供貸款</p>
+      <div class="container"><button onclick="closeAnswer(3,1)">好</button></div>
+  </div>
+  <div id="answer3_2" class="window">
+    <h3 class="green">法院傳票像廣告信件一樣收不完</h3>
+    <p>雷震等人預定於1960年9月成立「中國民主黨」，並投入隔年的地方選舉。籌組時期，國民黨當局更加嚴密監控組黨人士，例如吳三連的事業即遭威脅，銀行拒絕提供貸款</p>
+      <div class="container"><button onclick="closeAnswer(3,2)">好</button></div>
+  </div>
+  <div id="answer3_3" class="window">
+    <h3 class="green">特務整天跟監你，甚至抓去關</h3>
+    <p>雷震等人預定於1960年9月成立「中國民主黨」，並投入隔年的地方選舉。籌組時期，國民黨當局更加嚴密監控組黨人士，例如雷震天天遭到特務跟蹤。
+    </br> 並且在1960年9月4日，雷震及多位相關人士被捕；在1960年10月8日的判決中，軍事法庭依照蔣中正指示，判處雷震有期徒刑十年，褫奪公權七年。
+      </p>
+      <div class="container"><button onclick="closeAnswer(3,3)">好</button></div>
+  </div>
+
+  <div id="quiz4" class="window">
+    <h3>1960年代雷震案與《台灣自救宣言》</h3>
+    <p>今日在臺灣有創作、翻譯、報導、出版的自由，但在1960年代卻可能遭到逮補？</p>
+      <div class="container">
+      <button onclick="chooseAnswer(4,1)">創作詩詞</button>
+      <button onclick="chooseAnswer(4,2)">翻譯國外的漫畫</button>
+      <button onclick="chooseAnswer(4,3)">出版作品</button></div>
+  </div>
+  <div id="answer4_1" class="window">
+    <h3 class="green">創作詩詞</h3>
+    <p>1963年4月23日《聯合報》副刊刊登屬名風遲（王鳳池）的作品〈故事〉一詩而被盯上，國民黨政府認為詩中有影射總統愚昧無知之嫌，不僅作者王鳳池被逮捕，《聯合報》副刊主編林海音也為了避免連累報社而被迫辭職。</p>
+      <div class="container"><button onclick="closeAnswer(4,1)">好</button></div>
+  </div>
+  <div id="answer4_2" class="window">
+    <h3 class="green">翻譯國外的漫畫</h3>
+    <p>1968年1月3日，《中華日報》刊登柏楊翻譯的美國「大力水手」漫畫。漫畫對白被認為影射蔣中正父子，柏楊遭到逮捕。警總在漫畫剪報下，註解：「很明顯係影射總統，因全世界只有我國總統寫告全國同胞書」。
+    </br>情治單位為了將他入罪，在審訊過程，迫使柏楊承認曾參與中國民主同盟，最終被判處十二年的有期徒刑。</p>
+      <div class="container"><button onclick="closeAnswer(4,2)">好</button></div>
+  </div>
+  <div id="answer4_3" class="window">
+    <h3 class="green">出版作品</h3>
+    <p>1960年代蕭孟能主持的文星書店與《文星》雜誌，因出版書籍及《文星》所刊登之文章，違反國民黨當局所推行的文化思想，而引起當局注意。1965年《文星》刊登主編李敖批評國民黨的文章而遭到查禁並停刊，連帶文星書局也被迫強制改組。      </p>
+      <div class="container"><button onclick="closeAnswer(4,3)">好</button></div>
+  </div>
+
+  <div id="quiz5" class="window">
+    <h3>1970~1980年代的挫折與突圍</h3>
+    <p>今日臺灣人民有發表政治意見、投票、參選等自由，但在1970年代，若你想參與選舉，可能會遭遇甚麼事？</p>
+      <div class="container">
+      <button onclick="chooseAnswer(5,1)">投票給支持度高的候選人</button>
+      <button onclick="chooseAnswer(5,2)">發行政論雜誌</button>
+      <button onclick="chooseAnswer(5,3)">參選立法委員</button></div>
+  </div>
+  <div id="answer5_1" class="window">
+    <h3 class="green">投票給支持度高的候選人</h3>
+    <p>1977年許信良參選的桃園縣長選情受到社會高度關注。開票當天，桃園中壢國小投票所發生選舉舞弊嫌疑爭議。進而引起抗議群眾包圍中壢分局，爆發衝突，稱為「中壢事件」。</p>
+      <div class="container"><button onclick="closeAnswer(5,1)">好</button></div>
+  </div>
+  <div id="answer5_2" class="window">
+    <h3 class="green">發行政論雜誌</h3>
+    <p>1975年8月由黃信介、康寧祥、張俊宏等本土菁英所創立的第一份黨外雜誌，民眾爭睹，造成轟動。1975年12月28日，《台灣政論》遭到台北市政府新聞處以涉嫌「煽動叛亂」為由，予以停刊處分，僅發行了五期就被迫畫下句點。停刊後，擔任副總編輯的黃華於1976年被捕並判處10年重罪。</p>
+      <div class="container"><button onclick="closeAnswer(5,2)">好</button></div>
+  </div>
+  <div id="answer5_3" class="window">
+    <h3 class="green">參選立法委員</h3>
+    <p>1975年白雅燦宣布在台北市參選額立法委員，並印製競選傳單公開質問蔣經國29個問題。同年10月即遭到逮捕，並被處以無期徒刑，褫奪公權終身。      </p>
+      <div class="container"><button onclick="closeAnswer(5,3)">好</button></div>
+  </div>
+
+  <div id="quiz6" class="window">
+    <h3>1987-1992年解嚴後的未竟之路</h3>
+    <p>臺灣，從解嚴、《懲治叛亂條例》廢除到《刑法》100條修正，是透過哪些社會運動，實現了現在百分百言論自由的臺灣？</p>
+      <div class="container">
+      <button onclick="chooseAnswer(6,1)">519綠色行動</button>
+      <button onclick="chooseAnswer(6,2)">野百合學運</button>
+      <button onclick="chooseAnswer(6,3)">100行動聯盟－反閱兵・廢惡法</button></div>
+  </div>
+  <div id="answer6_1" class="window">
+    <h3 class="green">1987-1992年解嚴後的未竟之路</h3>
+    <p>1986年5月，鄭南榕等發起「519綠色行動」，抗議戒嚴體制及反對制定國安法。5月19日，大批群眾在龍山寺集結，高呼「要自由、要民主、不要戒嚴」。</p>
+      <div class="container"><button onclick="closeAnswer(6,1)">好</button></div>
+  </div>
+  <div id="answer6_2" class="window">
+    <h3 class="green">野百合學運</h3>
+    <p>1990年李登輝當選總統後，在美國持續要求台灣推動政治改革與國內包括「野百合學運」要求改革的社會氛圍下，進一步展開自由化、民主化的改革。1991年終止動員戡亂、廢除臨時條款。</p>
+      <div class="container"><button onclick="closeAnswer(6,2)">好</button></div>
+  </div>
+  <div id="answer6_3" class="window">
+    <h3 class="green">100行動聯盟－反閱兵・廢惡法</h3>
+    <p>在「100行動聯盟」的施壓及社會持續呼籲下，終於使國民黨當局在「只修不廢」的原則下，同意廢除言論叛亂的最後一道枷鎖。1992年5月15日，立法院通過修正《刑法》100條，因「言論叛亂」被捕的李應元等人也隨即被釋放。      </p>
+      <div class="container"><button onclick="closeAnswer(6,3)">好</button></div>
+  </div>
+
+  <div id="quiz7" class="window">
+    <h3>新時代的挑戰</h3>
+    <p>即便是現在入列為自由國家的臺灣，我們還可能因為什麼原因，被箝制了言論自由？</p>
+      <div class="container">
+      <button onclick="chooseAnswer(7,1)">公開場合唱國歌、拿國旗</button>
+      <button onclick="chooseAnswer(7,2)">到中國投資</button>
+      <button onclick="chooseAnswer(7,3)">支持太陽花學運、香港佔中</button></div>
+  </div>
+  <div id="answer7_1" class="window">
+    <h3 class="green">公開場合唱國歌、拿國旗</h3>
+    <p>2020年台灣首次政黨輪替，政權和平轉移，520總統就職典禮邀請歌手張惠媒演唱國歌，卻因此遭中國禁止其前往商演長達4年，對台灣演藝產業造成寒蟬效應。
+    </br>韓團Twice臺灣成員周子瑜，因在節目中舉家鄉國旗，被黃安舉報為臺獨分子，Twice春晚演出被取消，後更傳出將終止周子瑜的代言活動。2017年1月15日，周子瑜被迫在其經紀公司JYP的官網上道歉，影片一出引起國際間的關注。
+      </p>
+      <div class="container"><button onclick="closeAnswer(7,1)">好</button></div>
+  </div>
+  <div id="answer7_2" class="window">
+    <h3 class="green">到中國投資</h3>
+    <p>自台灣開放三通，台商投資中國趨之若騖，中國為促進統一，厲行以商逼政、以民逼官。2005年3月奇美集團的創辦人許文龍發表的退休感言，肯定中國通過《反分裂國家法》，引發軒然大波。同為好友的卸任總統李登輝，受訪透露實為被逼之言。</p>
+      <div class="container"><button onclick="closeAnswer(7,2)">好</button></div>
+  </div>
+  <div id="answer7_3" class="window">
+    <h3 class="green">支持太陽花學運、香港佔中</h3>
+    <p>2016年原定參演中國電影的台灣演員戴立忍，遭中國網友指其參與反核，支持太陽花學運、香港佔中運動，因而推論反中親台獨的立場。最後，片商發出換角聲明，戴立忍同日聲明，否認台獨立場，尊重片商決定。      </p>
+      <div class="container"><button onclick="closeAnswer(7,3)">好</button></div>
+  </div>
+
+
+  
+  <div id="portrait1" class="window">
+    <h3>楊逵</h3>
+    <p>上海《大公報》於1949年1月21日刊登記由歌雷處取得楊逵所撰〈和平宣言〉的文稿，內容要求還政於民、和平建國、保障言論自由，呼籲避免台灣捲入戰爭，成為和平示範區等訴求。
+    </br>因此楊逵遭指控言論有利叛徒宣傳，被依《懲治叛亂條例》第七條，判處12年有期徒刑。同案被告鐘平山（7年）、陳軍（10年）有期徒刑。楊逵日後戲稱「領過全世界最高的稿費」。</p>
+      <div class="container">
+      <button><a href="/" target="_blank">更多</a></button>
+      <button onclick="closeWindow('#portrait1')">關閉</button></div>
+  </div>
+<div id="portrait2" class="window">
+  <h3>雷震</h3>
+  <p>蔣中正1956年生日前夕，公開對外徵求建言。《自由中國》響應發行「祝壽專號」，卻由於文章內容批評政治現狀，引起蔣中正及國民黨當局不滿，繼而發動政戰系統及媒體圍剿《自由中國》，雙方關係因此正式決裂。
+  </br>圖：自由中國社九週年紀念會、《自由中國》祝壽專號</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait2')">關閉</button></div>
+</div>
+<div id="portrait3" class="window">
+  <h3>傅正</h3>
+  <p>1988年4月，雷震案後援會提出，要求平反雷震案，並索回雷震四百萬字回憶錄文稿及日記等文物。查案委員謝崑山於七月透露，雷震回憶錄遭「焚毀」一事，引發雷震案後援會憤怒，聚集群聚向監察院提出抗議。</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait3')">關閉</button></div>
+</div>
+<div id="portrait4" class="window">
+  <h3>殷海光</h3>
+  <p>1966年教育部行文台大，「要求」不續聘殷海光。殷告訴錢思亮校長：「我並沒有一定在台大待下去的意思。我只是想，像外界對我所作種種處斷，不僅嚴重地侵犯民主社會的人權和學人尊嚴，而且在事實上使我來不及轉身。」
+  </br>圖：致錢思亮校長信</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait4')">關閉</button></div>
+</div>
+<div id="portrait5" class="window">
+  <h3>彭明敏</h3>
+  <p>當我們把頭抬起來，看到：國家地位模糊、國格淪喪、國家目的破碎、社會迷失徬徨......，所以真正愛台灣、關心台灣的人，有一種感覺——台灣非重建不可，政治非改革不可，社會非改造不可......
+  </br>－政治大學「請問總統先生」國是座談，1995年12月15日。
+</br>回到台灣的彭明敏，1995年彭明敏順利通過民進黨黨內初選，並邀請謝長廷擔任副總統人選，共同參選台灣首屆民選總統。
+</br> 圖：1996.3參與民主進步黨總統候選人黨內初選選舉文宣、彭明敏・謝長廷競選視覺標誌</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait5')">關閉</button></div>
+</div>
+<div id="portrait6" class="window">
+  <h3>魏廷朝</h3>
+  <p>參選三願
+  </br>第一：如何形成「國家意思」，是我自起草「台灣自救宣言」(一九六四年)到現在始終念念不忘的問題。因此，我特別希望能夠在「萬年政黨」可能失去立法院內過半數席次的大選中，代表反對黨競選立法委員，爭取參加形成「國家意思」的機會。
+</br>第二：社會上有不少人在抱怨：台灣的公職人員來越腐朽，做秀、關說、利益輸送，忘記理想和衝勁。也有人提醒我：「當公職，你也會變得跟他們一樣」我偏不信邢。我願意重振三十年前，只問是非，不計安危的勇氣和信心，做專業立法委員的楷模，恢復民進黨在台灣人民心目中的公信力。
+</br>第三：近年來，選風敗壞，一般人認為：不大花錢，根本不可能當選。最可怕的是，大家都漸漸受到感染。這對民主政治的前途，是極大的障礙。我希望能夠借我自己參選的機會，樹立清白選舉的典範。
+</br>圖：1983魏廷朝雜誌報導、1995魏廷朝選舉傳單</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait6')">關閉</button></div>
+</div>
+<div id="portrait7" class="window">
+  <h3>謝聰敏</h3>
+  <p>1971年謝聰敏再度因美國商業銀行及美國台南新聞處爆炸案入獄，獄友小林正成在遣返日本後，將謝的求援信傳播出來，謝才得以保外就醫。2007年兩人出席台北賓館的「政治受難者與救援者相見歡晚會」，公開當年信件內容。</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait7')">關閉</button></div>
+</div>
+<div id="portrait8" class="window">
+  <h3>李敖</h3>
+  <p>李敖在《文星》第98期發表社論〈我們對「國法黨限」的嚴正表示—以謝然之先生的作風為例〉，指國民黨員謝然之濫用權力，批評國民黨黨部對「國法黨限」觀念的混亂。此文成為《文星》停刊的導火線。</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait8')">關閉</button></div>
+</div>
+<div id="portrait9" class="window">
+  <h3>柏楊</h3>
+  <p>《異域》原以「血戰異域十一年」連載於民國50年的《自立晚報》，署名「鄧克保」，其後由平原出版社出版，易名「異域」（1961年），流傳極廣，1977年由星光出版社再版，11年後另有躍昇文化公司版本。
+  </br>本書記載1949年底從雲南往緬甸撤退的孤軍之奮戰及其艱難險阻，孤軍腹背受敵（共軍、緬軍），又得不著政府之支援，在複雜情勢中的戰略擬定及戰術運用，以及袍澤、親子的關係等情節，交織成一部感人肺腑的戰爭文學作品。
+</br>圖：為1961年平原出版社出版「異域」</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait9')">關閉</button></div>
+</div>
+<div id="portrait10" class="window">
+  <h3>黃信介</h3>
+  <p>美麗島的精神
+  </br> 1、大公無私    2、同志愛    3、團結和諧    4、反K到底    5、愛台灣為同胞    6、培養新生代
+</br>作法：
+</br>團結所有黨人士，宣揚台灣文化。對抗K。為台灣爭權利。
+</br>圖：1978年串聯與未完成的選舉、黃信介手稿</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait10')">關閉</button></div>
+</div>
+<div id="portrait11" class="window">
+  <h3>康寧祥</h3>
+  <p>1978年未完成的立委與國代選舉文宣（節錄）
+  </br>現在，台灣的命運又面臨了國際強權外交的擺佈。所謂台灣地位問題，好像表示台灣的命運是操在那些霸國手中，不操在台灣一千七百萬人民自己手中似的。在這種情形下，台灣島上的所有居民還有什麼地域和省籍之分呢？還能不趕緊團結在一起為台灣的生存和將來奮鬥嗎？國民黨面對這空前的困局到底要走向何處去？是否應該尊重台灣島上所有居民的意見？
+</br>圖：1980.11.1康寧祥與民主政治（禁書）</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait11')">關閉</button></div>
+</div>
+<div id="portrait12" class="window">
+  <h3>施明德</h3>
+  <p>《施明德給台灣的政治遺囑》一書，出版於1988年1月，是施明德在美麗島軍法大審最後答辯全文（近90頁），它呈現了一位人權工作者的心路歷程，為台灣未來的民主前程提供幾個既現實又前衛的對策。
+  </br>《奉獻給台灣的施明德》是施明德重新取得公民權後，代表民進黨在1992年參選台南市立法委員的競選手冊。</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait12')">關閉</button></div>
+</div>
+<div id="portrait13" class="window">
+  <h3>陳水扁</h3>
+  <p>鄭南榕所創辦《自由時代》雜誌，被認為違反「台灣地區戒嚴時期出版物管制辦法」，遭扣押出版物。
+  </br>圖：「自由時代週刊第一六四期依法查禁」公文
+</br>《自由時代》刊登許世楷起草的《台灣共和國新憲法草案》，鄭南榕因此遭傳訊。因為堅定捍衛包括主張台灣獨立的言論自由，鄭南榕拒絕出庭應訊；1989年4月7日警方強行攻堅試圖將之拘提到案，鄭南榕自焚殉難。鄭南榕生前曾說過：「要打破國民黨的專制權威，我們一定要突破總統府前的遊行禁忌。」1989年5月19日，眾人舉行鄭南榕告別遊行，行經總統府前時，舉行悼念儀式，完成他的心願。
+</br>圖：1989.5.19鄭南榕告別式文宣  </p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait13')">關閉</button></div>
+</div>
+<div id="portrait14" class="window">
+  <h3>鄭南榕</h3>
+  <p>當我們把頭抬起來，看到：國家地位模糊、國格淪喪、國家目的破碎、社會迷失徬徨......，所以真正愛台灣、關心台灣的人，有一種感覺——台灣非重建不可，政治非改革不可，社會非改造不可......
+  </br>－政治大學「請問總統先生」國是座談，1995年12月15日。
+</br>回到台灣的彭明敏，1995年彭明敏順利通過民進黨黨內初選，並邀請謝長廷擔任副總統人選，共同參選台灣首屆民選總統。
+</br> 圖：1996.3參與民主進步黨總統候選人黨內初選選舉文宣、彭明敏・謝長廷競選視覺標誌</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait14')">關閉</button></div>
+</div>
+<div id="portrait15" class="window">
+  <h3>李鎮源</h3>
+  <p>1991年9月21日，中研院士李鎮源及陳師孟、林山田、廖宜恩等教授，號召成立「100行動聯盟」，要求廢止刑法第100條。1991年10月8日，發動「反閱兵，廢惡法」，在總統府旁的台大醫學院基礎醫學大樓前靜坐抗議。在「100行動聯盟」的施壓及社會持續呼籲下，終於使國民黨當局在「只修不廢」的原則下，同意廢除言論叛亂的最後一道枷鎖。
+  </br>圖：1991年「100行動聯盟」傳單、布條、標語圖</p>
+    <div class="container">
+    <button><a href="/" target="_blank">更多</a></button>
+    <button onclick="closeWindow('#portrait15')">關閉</button></div>
+</div>
+
+<div id="progress" class="window">
+  <h3>進度</h3>
+  <div class="container">
+  <div id="progress1" class="stamp"></div><div id="progress2" class="stamp"></div><div id="progress3" class="stamp"></div>
+  <div id="progress4" class="stamp"></div><div id="progress5" class="stamp"></div><div id="progress6" class="stamp"></div>
+  <div id="progress7" class="stamp"></div><div id="progress8" class="stamp"></div></div>
+  <div class="container"><button onclick="closeWindow('#progress');openWindow('#entername')">獎狀</button></div>
+  </div>
+</div>
+
+<div class="window" id="entername">
+    <h3>請輸入您的名字</h3>
+    <p><input type="text" id="input_name" name="name" style="margin: 0 auto;width: 40%;height: 8vmin;align-self: center;"></p>
+    
+    <button onclick="createCertificate();closeWindow('#entername');">送出</button>
+
+
+</div>
+
+<div id="certificate_window" class="">
+  <div id="certificate">
+    <img src="Images/certificate.png">
+    <h2 id="cert_name">text</h2>
+    <h2 id="cert_date">text</h2>
+  </div>
+  <div id="canvasWrapper">
+    
+  </div>
+  <button onclick="saveCert()" style="right: 5%;bottom: 3%;background-image: url('Images/floppy-disk-solid.png');"></button>
+  <button onclick="closeWindow('#certificate_window')" style="top: 3%;right: 5%;background-image: url('Images/cancel.png');"></button>
+</div>
+
+
+
+
+    <button id="progressBar" onclick="openProgress()"><div class="dottedLine"></div><div class="container">
+      <div id="dot1" class="stampdot"></div><div id="dot2" class="stampdot"></div><div id="dot3" class="stampdot"></div>
+      <div id="dot4" class="stampdot"></div><div id="dot5" class="stampdot"></div><div id="dot6" class="stampdot"></div>
+      <div id="dot7" class="stampdot"></div><div id="dot8" class="stampdot"></div>
+    </div></button>
+    
+    <a-scene mindar-image="imageTargetSrc: Markers/targets.mind;uiScanning: #scanUI;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-entity id="area1" mindar-image-target="targetIndex: 0"></a-entity>
+      <a-entity id="area2" mindar-image-target="targetIndex: 1"></a-entity>
+      <a-entity id="area3" mindar-image-target="targetIndex: 2"></a-entity>
+      <a-entity id="area4" mindar-image-target="targetIndex: 3"></a-entity>
+      <a-entity id="area5" mindar-image-target="targetIndex: 4"></a-entity>
+      <a-entity id="area6" mindar-image-target="targetIndex: 5"></a-entity>
+      <a-entity id="area7" mindar-image-target="targetIndex: 6"></a-entity>
+      <a-entity id="char1" mindar-image-target="targetIndex: 7"></a-entity>
+      <a-entity id="char2" mindar-image-target="targetIndex: 8"></a-entity>
+      <a-entity id="char3" mindar-image-target="targetIndex: 9"></a-entity>
+      <a-entity id="char4" mindar-image-target="targetIndex: 10"></a-entity>
+      <a-entity id="char5" mindar-image-target="targetIndex: 11"></a-entity>
+      <a-entity id="char6" mindar-image-target="targetIndex: 12"></a-entity>
+      <a-entity id="char7" mindar-image-target="targetIndex: 13"></a-entity>
+      <a-entity id="char8" mindar-image-target="targetIndex: 14"></a-entity>
+      <a-entity id="char9" mindar-image-target="targetIndex: 15"></a-entity>
+      <a-entity id="char10" mindar-image-target="targetIndex: 16"></a-entity>
+      <a-entity id="char11" mindar-image-target="targetIndex: 17"></a-entity>
+      <a-entity id="char12" mindar-image-target="targetIndex: 18"></a-entity>
+      <a-entity id="char13" mindar-image-target="targetIndex: 19"></a-entity>
+      <a-entity id="char14" mindar-image-target="targetIndex: 20"></a-entity>
+      <a-entity id="char15" mindar-image-target="targetIndex: 21"></a-entity>
+    </a-scene>
+
+  </body>
+  <script>
+    var windowActive=new Boolean(false);
+    const progress=[0,0,0,0,0,0,0,0];
+    var completed=new Boolean(false);
+    var certImg;
+    (function() {
+      windowActive=false;
+      completed=false;
+      readProgress();
+    })();
+    for (let i = 1; i < 8; i++) {
+    const areaTarget = document.querySelector("#area"+CSS.escape(i));
+    areaTarget.addEventListener("targetFound", event => {  
+      console.log("target found "+(i-1))
+      if(!windowActive){
+       
+      document.querySelector("#quiz"+CSS.escape(i)).classList.add("show");
+      windowActive=true;
+      }
+
+
+    });
+    }
+    for (let i = 1; i < 16; i++) {
+    const areaTarget = document.querySelector("#char"+CSS.escape(i));
+    areaTarget.addEventListener("targetFound", event => {  
+      console.log("target found "+(i+7))
+      if(!windowActive){
+        document.querySelector("#portrait"+CSS.escape(i)).classList.add("show");
+      windowActive=true;
+      }
+    });
+    }  
+    function openProgress(){
+      document.querySelector("#progress").classList.toggle("show");
+    }
+    function readProgress(){
+      if(!completed){
+      var allDone=new Boolean(true);
+      let c=0;
+      for (let i = 1; i < 9; i++) {
+        console.log(getCookie("progress"+i));
+        if(getCookie("progress"+i)==1){
+          progress[i]=1;
+          document.querySelector("#progress"+CSS.escape(i)).classList.add("show");
+          c+=1;
+        }
+        else{
+          allDone=false;
+        }
+      }
+
+      for (let i = 1; i < 9; i++) {
+        if(i<=c){
+          document.querySelector("#dot"+CSS.escape(i)).classList.add("show");
+        }
+        else{
+          document.querySelector("#dot"+CSS.escape(i)).classList.remove("show");
+        }
+      }
+
+      if(allDone){
+        completed=true;
+      }
+      }
+    }
+    function checkProgress(){
+      if(!completed){
+      var allDone=new Boolean(true);
+      let c=0;
+      for (let i = 1; i < 9; i++) {
+          if(progress[i]==1){
+            c+=1;
+          }
+          else{
+            allDone=false;
+          }
+          
+        }
+     
+      for (let i = 1; i < 9; i++) {
+        if(i<=c){
+          document.querySelector("#dot"+CSS.escape(i)).classList.add("show");
+        }
+        else{
+          document.querySelector("#dot"+CSS.escape(i)).classList.remove("show");
+        }
+      }
+
+      if(allDone){
+        completed=true;
+      }
+    }
+    }
+    function chooseAnswer(index,answer){
+      document.querySelector("#quiz"+CSS.escape(index)).classList.remove("show");
+      document.querySelector("#answer"+CSS.escape(index)+"_"+CSS.escape(answer)).classList.add("show");
+      
+    }
+    function closeAnswer(index,answer){
+      document.querySelector("#answer"+CSS.escape(index)+"_"+CSS.escape(answer)).classList.toggle("show");
+      document.querySelector("#progress"+CSS.escape(index)).classList.add("show");
+      document.querySelector("#dot"+CSS.escape(index)).classList.add("show");
+      progress[index]=1;
+      setCookie("progress"+index,1,30);
+      checkProgress();
+      windowActive=false;
+    }
+    function openWindow(id){
+      document.querySelector(id).classList.add("show");
+      windowActive=true;
+    }
+    function closeWindow(id){
+      document.querySelector(id).classList.remove("show");
+      windowActive=false;
+    }
+    function setCookie(name,value,days) { 
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+  function createCertificate(){
+    openWindow('#certificate_window');
+    const d=new Date();
+    document.getElementById("cert_name").innerHTML=document.getElementById('input_name').value;
+    document.getElementById("cert_date").innerHTML=d.getFullYear()+"/"+d.getMonth()+"/"+d.getDate();
+    const c=document.querySelector("#certificate");
+    html2canvas(c, {
+    onrendered: function(canvas) {
+      canvas.className = "html2canvas";
+      document.getElementById("canvasWrapper").appendChild(canvas);
+      const image = canvas.toDataURL("image/png");
+      certImg=image;
+      openWindow("#canvasWrapper");
+    },
+    useCORS: true
+  });
+  }
+function saveCert(){
+  var a  = document.createElement('a');
+    a.href = certImg;
+    a.download = 'certificate.png';
+
+    a.click()
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {   
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+</script>
+
+</html>
